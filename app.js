@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const User = require('./db/userModel');
+const Site = require('./db/siteModel');
 
 const auth = require('./auth');
 
@@ -122,6 +123,44 @@ app.post('/login', (req, res) => {
         err
       })
     })
+})
+
+app.post('/sites', auth, (req, res) => {
+  const user = User.findOne({email: req.body.email})
+    .then(user => {
+      Site.find({}, function(err, sites){
+        if(err){
+          res.json({message: 'Something went wrong!'})
+        }else{
+          const all = sites.filter(site => {
+            return site.user.equals(user._id);
+          });
+          res.json({sites: all});
+        }
+      })
+    })
+    .catch(error => console.log(error));  
+})
+
+app.post('/add', auth, (req, res) => {  
+  User.findOne({email: req.body.email})
+    .then(user => {
+      const newSite = new Site({
+        link: req.body.link,
+        user: user
+      });
+
+      newSite.save().then(result => console.log('new site added')).catch(err => console.log(err));
+      user.webpages.push(newSite);
+      user.save();
+      res.json({message: 'Successfully Added!'})
+
+    })
+    .catch(error => {
+      console.error(error)
+      res.json({message: "Something went wrong!"})
+    });
+
 })
 
 
