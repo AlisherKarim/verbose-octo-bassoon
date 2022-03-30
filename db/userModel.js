@@ -11,7 +11,15 @@ const userSchema = new mongoose.Schema({
         type: String, 
         required: [true, 'Please Provide password'],
         unique: false
-    }
+    },
+
+    webpages: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Site'
+        }
+    ]
+
 })
 
-module.exports = mongoose.model("Users", userSchema);
+module.exports = mongoose.model("User", userSchema);
